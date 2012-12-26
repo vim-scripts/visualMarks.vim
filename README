@@ -1,0 +1,22 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=4370
+
+Documentation {{{1
+
+Name: visualMarks.vim
+Version: 1.0
+Description: Simple plugin to show file marks visually
+Author: Alexandre Viau (alexandreviau@gmail.com)
+Installation: Copy the plugin to the vim plugin directory.
+
+Usage: {{{2
+
+Simply use vim marks like usually doing
+ma, mb, mc...mz
+or
+mA, mB, mC...mZ
+to marks positions in files.
+NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
+
+History:
+1.0 Initial release
+1.1 Removed the space in the mappings that where moving the cursor to the right
