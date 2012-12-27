@@ -1,6 +1,6 @@
 " Documentation {{{1
 " Name: visualMarks.vim
-" Version: 1.0
+" Version: 1.1
 " Description: Simple plugin to show file marks visually
 " Author: Alexandre Viau (alexandreviau@gmail.com)
 " Installation: Copy the plugin to the vim plugin directory.
@@ -13,6 +13,10 @@
 " to marks positions in files.
 "
 " NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
+"
+" History:
+" 1.0 Initial release
+" 1.1 Removed the space in the mappings that where moving the cursor to the right after execution
 
 " Add mappings {{{1
 " Uses nnoremap not to have a recursive mapping
@@ -20,10 +24,10 @@
 for n in range(1, 26)
     " Uppercase (A-Z)
     let l = nr2char(n + 64)
-    exe 'nnoremap <silent> m' . l . ' m' . l . ' :cal g:VmAddSignToMark("' . l . '")<cr>'
+    exe 'nnoremap <silent> m' . l . ' m' . l . ':cal g:VmAddSignToMark("' . l . '")<cr>'
     " Lowercase (a-z)
     let l = nr2char(n + 96)
-    exe 'nnoremap <silent> m' . l . ' m' . l . ' :cal g:VmAddSignToMark("' . l . '")<cr>'
+    exe 'nnoremap <silent> m' . l . ' m' . l . ':cal g:VmAddSignToMark("' . l . '")<cr>'
 endfor
 
 " Remove all signs {{{1
