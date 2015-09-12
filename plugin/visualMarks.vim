@@ -11,8 +11,10 @@
     " or
     " mA, mB, mC...mZ
     " to marks positions in files.
-
     " NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
+    " <tab>m To show the marks log file
+    " <tab>f3 To grep the marks log file
+    " All files opened in vim are added to the log file
 
 " Todo:
     " 1. Load the marks from vim info and show them visually.
