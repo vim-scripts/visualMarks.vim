@@ -1,56 +1,139 @@
-" Documentation {{{1
-" Name: visualMarks.vim
-" Version: 1.1
-" Description: Simple plugin to show file marks visually
-" Author: Alexandre Viau (alexandreviau@gmail.com)
-" Installation: Copy the plugin to the vim plugin directory.
-"
-" Usage: {{{2
-" Simply use vim marks like usually doing
-" ma, mb, mc...mz
-" or
-" mA, mB, mC...mZ
-" to marks positions in files.
-"
-" NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
-"
+" Documentation
+    " Name: visualMarks.vim
+    " Version: 2.0
+    " Description: Simple plugin to show file marks visually
+    " Author: Alexandre Viau (alexandreviau@gmail.com)
+    " Installation: Copy the plugin to the vim plugin directory.
+
+" Usage:
+    " Simply use vim marks like usually doing
+    " ma, mb, mc...mz
+    " or
+    " mA, mB, mC...mZ
+    " to marks positions in files.
+
+    " NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
+
+" Todo:
+    " 1. Load the marks from vim info and show them visually.
+    " 2. Add mapping to automatically mark with next unused mark.
+    " 3. Show warning if mark already used somewhere to prevent overwriting marks.
+    " 4. s0 Add the possibility to select a log in the log file and then go to that position in the file
+    " 5. s0 Le type the recherche ne devrait pas etre regex car s'il y a des [ ou ] alors la chaine n'est pas trouvee
+    " 6. s0 Fix the mapping for the search for the line number it is not working now, everything I put is not working
+
 " History:
-" 1.0 Initial release
-" 1.1 Removed the space in the mappings that where moving the cursor to the right after execution
+    " 1.0 Initial release
+    " 1.1 Removed the space in the mappings that where moving the cursor to the right after execution
+    " 1.2 Change the file format for unix
+    "     Added a fold to history
+    " 1.3 Added 2 mappings (commented, to uncomment if you want to) to remap ` on ' and ' on `, because ` is more useful and ' more close
+    " 1.4 Now the marks are saved to a log file so that it can be viewed to remember the previous marked positions. Also the line logged is copied to the clipboard. Later I will add the possibility go to the positions marked in the log file.
+    " 2.0 I added a log file where each mark location is saved to it. And doing <tab>m will show the log file and allow to choose one of the previously logged location. Also, all files opened in vim are added to the log file, so it is like an history of files opened and locations in files. Tab<f3> will run grep to search the log file.
 
-" Add mappings {{{1
-" Uses nnoremap not to have a recursive mapping
-" Letters
-for n in range(1, 26)
-    " Uppercase (A-Z)
-    let l = nr2char(n + 64)
-    exe 'nnoremap <silent> m' . l . ' m' . l . ':cal g:VmAddSignToMark("' . l . '")<cr>'
-    " Lowercase (a-z)
-    let l = nr2char(n + 96)
-    exe 'nnoremap <silent> m' . l . ' m' . l . ':cal g:VmAddSignToMark("' . l . '")<cr>'
-endfor
+" Variables
+    let g:visualMarksLogFilePath = $vim . '/visualMarks.Log'
 
-" Remove all signs {{{1
-sign unplace *
+" Settings
+    " Remove all signs
+        sign unplace *
 
-" Functions {{{1
-" g:VmAddSignToMark(m) {{{2
-" Show the marks visually on a column at the left of the screen
-fu! g:VmAddSignToMark(m)
-    " Create an id {{{3
-    " Uppercase (A-Z) {{{4
-    if char2nr(a:m) >= 65 && char2nr(a:m) <= 90
-        " The id is global to all buffers like the marks using uppercase letters are global to all buffers
-        let id = char2nr(a:m)
-    " Lowercase (a-z) {{{4
-    else
-        " The id is local to the current buffer like the marks using lowercase letters and numbers are local to the current buffer
-        let id = bufnr('%') . char2nr(a:m)
-    endif
-    " Remove sign if already added {{{3
-	exe 'sign unplace ' . id
-    " Define the sign {{{3
-    exe 'sign define ' . a:m . ' text=' . a:m . ' texthl=Search'
-    " Add the sign {{{3
-    exe 'sign place ' . id . ' line=' . line('.') . ' name=' . a:m . ' file=' . expand('%:p')
-endfu
+" Mappings
+    " Add mappings
+        " If you want you may uncomment these 2 mappings to remap ` on ' and ' on `, because ` is more useful and ' more close
+        " nnoremap ` '
+        " nnoremap ' `
+
+        " Uses nnoremap not to have a recursive mapping
+        " Letters
+        for n in range(1, 26)
+            " Uppercase (A-Z)
+            let l = nr2char(n + 64)
+            exe 'nnoremap <silent> m' . l . ' m' . l . ':cal g:VmAddSignToMark("' . l . '")<cr>'
+            " Lowercase (a-z)
+            let l = nr2char(n + 96)
+            exe 'nnoremap <silent> m' . l . ' m' . l . ':cal g:VmAddSignToMark("' . l . '")<cr>'
+        endfor
+        
+    " Show and select marks
+        com! ShowMarks :exe 'split ' . g:visualMarksLogFilePath | exe 'norm GzR'
+        com! ShowMarksFullScreen :exe 'e ' . g:visualMarksLogFilePath | exe 'norm GzR'
+            nmap <tab>m :ShowMarks<cr> 
+        
+    " Log a line position without a mark
+        nmap <leader>l :call g:VmLogToFile('', 0)<cr>
+        autocmd! BufReadPre * :call g:VmLogToFile('', 0)
+
+    " Get the current line (function name) to paste in other applications
+        nmap <leader>f :let @* = getline('.')<cr>
+
+    " Go to the line number in the selected log item in the log file
+        " BUG: s0 It seems I cannot have c-enter and enter at the same time, they don't work together, only one defined works. https://groups.google.com/forum/#!topic/vim_use/y9qYhazt1Ls
+        " s0 Change this mapping so it doesn't use the @f and @n registries
+        "autocmd! BufNewFile,BufRead,BufEnter visualMarks.Log nmap <buffer> <s-Enter> :exe 'norm 0f]wvf:f:h"fy' \| exe 'norm EF:l"nyw' \| exe 'wincmd j' \| exe 'edit! ' . @f \| exe 'norm ' . substitute(@n, ' ', '', 'g') . 'GzR'<cr>
+        " \| exe 'wincmd k'<cr>
+
+    " Go search the line from the log file in the selected file
+        " s0 Change this mapping so it doesn't use the @f and @l registries
+        " s0 This function seems to have difficulty to find strings with ' and inside... or it cannot find some lines (strings)
+        "autocmd! BufNewFile,BufRead,BufEnter visualMarks.Log nmap <buffer> <Enter> :exe 'norm 0f]wvf:f:h"fy' \| exe 'norm W"ly$' \| exe 'wincmd j' \| exe 'edit! ' . @f \| let @/ = @l \| exe 'norm ggnzR'<cr>
+        com! OpenMark exe 'norm 0f];wvf:f:h"fy' | exe 'norm W"ly$' | exe 'wincmd j' | exe 'edit! ' . @f | let @/ = @l | exe 'norm ggnzR'
+        autocmd! BufNewFile,BufRead,BufEnter visualMarks.Log nmap <buffer> <Enter> :OpenMark<cr>
+         " \| exe 'wincmd k'<cr>
+        
+    " Find a file that I previously used
+        nmap <tab><f3> :tabe \| exe 'ShowMarksFullScreen' \| exe "call g:grep('')"<cr>
+
+" Functions
+    fu! g:VmAddSignToMark(m) " Show the marks visually on a column at the left of the screen
+        " Create an id {{{3
+        " Uppercase (A-Z) {{{4
+            if char2nr(a:m) >= 65 && char2nr(a:m) <= 90
+                " The id is global to all buffers like the marks using uppercase letters are global to all buffers
+                    let id = char2nr(a:m)
+            " Lowercase (a-z) {{{4
+                else
+                    " The id is local to the current buffer like the marks using lowercase letters and numbers are local to the current buffer
+                    let id = bufnr('%') . char2nr(a:m)
+                endif
+            " Remove sign if already added {{{3
+                exe 'sign unplace ' . id
+            " Define the sign {{{3
+                exe 'sign define ' . a:m . ' text=' . a:m . ' texthl=Search'
+            " Add the sign {{{3
+                exe 'sign place ' . id . ' line=' . line('.') . ' name=' . a:m . ' file=' . expand('%:p')
+            " Log the position that was marked
+                call g:VmLogToFile(a:m, 0)
+            endfu
+
+    fu! g:VmLogToFile(m, show) " Log the position that was marked
+            let l:mark = a:m
+            let l:dateTime = strftime("%Y-%m-%d_%H:%M:%S")
+            let l:path = expand("%:p:h") . '\' . expand("%:t") 
+            let l:lineNum = line('.') 
+            let l:line = getline('.')
+            let l:log = l:dateTime . ' [' . l:mark . '] [' . expand("%:t") . '] ' . l:path . ':' . l:lineNum . ' ' . l:line
+            " Append the log to the log file
+                let l:file = readfile(g:visualMarksLogFilePath)
+                call add(l:file, l:log)
+                call writefile (l:file, g:visualMarksLogFilePath)
+            if a:show != 0 
+                " Just to show the file where the mark is logged
+                    exe 'split ' . g:visualMarksLogFilePath
+                    norm G
+                " Copies the log line to the clipboard so that it is possible to paste it somewhere
+                    let @* = l:log
+            endif
+        endfu
+
+    fu! g:grep(keywords)
+        if a:keywords == ''
+            let l:input = input('grep: ', '') 
+        else
+            let l:input = a:keywords
+        endif
+        if l:input != '' 
+            silent! exe 'lvimgrep! /' . l:input . '/j %' 
+            lopen 
+        endif
+    endfunction

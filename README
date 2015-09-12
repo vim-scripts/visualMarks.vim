@@ -1,22 +1,37 @@
 This is a mirror of http://www.vim.org/scripts/script.php?script_id=4370
 
-Documentation {{{1
+" Documentation
+    " Name: visualMarks.vim
+    " Version: 2.0
+    " Description: Simple plugin to show file marks visually
+    " Author: Alexandre Viau (alexandreviau@gmail.com)
+    " Installation: Copy the plugin to the vim plugin directory.
 
-Name: visualMarks.vim
-Version: 1.0
-Description: Simple plugin to show file marks visually
-Author: Alexandre Viau (alexandreviau@gmail.com)
-Installation: Copy the plugin to the vim plugin directory.
+" Usage:
+    " Simply use vim marks like usually doing
+    " ma, mb, mc...mz
+    " or
+    " mA, mB, mC...mZ
+    " to marks positions in files.
+    " NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
+    " <tab>m To show the marks log file
+    " <tab>f3 To grep the marks log file
+    " All files opened in vim are added to the log file
 
-Usage: {{{2
+" Todo:
+    " 1. Load the marks from vim info and show them visually.
+    " 2. Add mapping to automatically mark with next unused mark.
+    " 3. Show warning if mark already used somewhere to prevent overwriting marks.
+    " 4. s0 Add the possibility to select a log in the log file and then go to that position in the file
+    " 5. s0 Le type the recherche ne devrait pas etre regex car s'il y a des [ ou ] alors la chaine n'est pas trouvee
+    " 6. s0 Fix the mapping for the search for the line number it is not working now, everything I put is not working
 
-Simply use vim marks like usually doing
-ma, mb, mc...mz
-or
-mA, mB, mC...mZ
-to marks positions in files.
-NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
+" History:
+    " 1.0 Initial release
+    " 1.1 Removed the space in the mappings that where moving the cursor to the right after execution
+    " 1.2 Change the file format for unix
+    "     Added a fold to history
+    " 1.3 Added 2 mappings (commented, to uncomment if you want to) to remap ` on ' and ' on `, because ` is more useful and ' more close
+    " 1.4 Now the marks are saved to a log file so that it can be viewed to remember the previous marked positions. Also the line logged is copied to the clipboard. Later I will add the possibility go to the positions marked in the log file.
+    " 2.0 I added a log file where each mark location is saved to it. And doing <tab>m will show the log file and allow to choose one of the previously logged location. Also, all files opened in vim are added to the log file, so it is like an history of files opened and locations in files. Tab<f3> will run grep to search the log file.
 
-History:
-1.0 Initial release
-1.1 Removed the space in the mappings that where moving the cursor to the right
