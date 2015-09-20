@@ -1,6 +1,6 @@
 " Documentation
     " Name: visualMarks.vim
-    " Version: 2.0
+    " Version: 2.1
     " Description: Simple plugin to show file marks visually
     " Author: Alexandre Viau (alexandreviau@gmail.com)
     " Installation: Copy the plugin to the vim plugin directory.
@@ -12,8 +12,11 @@
     " mA, mB, mC...mZ
     " to marks positions in files.
     " NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
-    " <tab>m To show the marks log file
-    " <tab>f3 To grep the marks log file
+    " <tab>m To show the marks log file (in a split view)
+    " f3 To show the marks log file (in current buffer)
+    " <-tab>f3 To show the marks log file (in a new tab)
+    " <s-tab>f3 Open and grep the marks log file
+    " <tab>g To grep the marks log file
     " All files opened in vim are added to the log file
 
 " Todo:
@@ -32,6 +35,7 @@
     " 1.3 Added 2 mappings (commented, to uncomment if you want to) to remap ` on ' and ' on `, because ` is more useful and ' more close
     " 1.4 Now the marks are saved to a log file so that it can be viewed to remember the previous marked positions. Also the line logged is copied to the clipboard. Later I will add the possibility go to the positions marked in the log file.
     " 2.0 I added a log file where each mark location is saved to it. And doing <tab>m will show the log file and allow to choose one of the previously logged location. Also, all files opened in vim are added to the log file, so it is like an history of files opened and locations in files. Tab<f3> will run grep to search the log file.
+    " 2.1 I added and modified mappings
 
 " Variables
     let g:visualMarksLogFilePath = $vim . '/visualMarks.Log'
@@ -59,7 +63,7 @@
         
     " Show and select marks
         com! ShowMarks :exe 'split ' . g:visualMarksLogFilePath | exe 'norm GzR'
-        com! ShowMarksFullScreen :exe 'e ' . g:visualMarksLogFilePath | exe 'norm GzR'
+        com! ShowMarksFullScreen :exe 'e! ' . g:visualMarksLogFilePath | exe 'norm GzR'
             nmap <tab>m :ShowMarks<cr> 
         
     " Log a line position without a mark
@@ -84,7 +88,10 @@
          " \| exe 'wincmd k'<cr>
         
     " Find a file that I previously used
-        nmap <tab><f3> :tabe \| exe 'ShowMarksFullScreen' \| exe "call g:grep('')"<cr>
+        nmap <f3> :exe 'ShowMarksFullScreen'<cr>
+        nmap <tab><f3> :tabe \| exe 'ShowMarksFullScreen'<cr>
+        nmap <tab><s-f3> :tabe \| exe 'ShowMarksFullScreen' \| exe "call g:grep('')"<cr>
+        nmap <tab>g :call g:grep('')<cr>
 
 " Functions
     fu! g:VmAddSignToMark(m) " Show the marks visually on a column at the left of the screen
