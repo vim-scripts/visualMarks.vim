@@ -1,6 +1,6 @@
 " Documentation
     " Name: visualMarks.vim
-    " Version: 2.1
+    " Version: 2.2
     " Description: Simple plugin to show file marks visually
     " Author: Alexandre Viau (alexandreviau@gmail.com)
     " Installation: Copy the plugin to the vim plugin directory.
@@ -14,7 +14,7 @@
     " NOTE: Only new marks are shown visually, this means that the marks already in the viminfo file will not be showned visually.
     " <tab>m To show the marks log file (in a split view)
     " f3 To show the marks log file (in current buffer)
-    " <-tab>f3 To show the marks log file (in a new tab)
+    " <tab>f3 To show the marks log file (in a new tab)
     " <s-tab>f3 Open and grep the marks log file
     " <tab>g To grep the marks log file
     " All files opened in vim are added to the log file
@@ -36,6 +36,7 @@
     " 1.4 Now the marks are saved to a log file so that it can be viewed to remember the previous marked positions. Also the line logged is copied to the clipboard. Later I will add the possibility go to the positions marked in the log file.
     " 2.0 I added a log file where each mark location is saved to it. And doing <tab>m will show the log file and allow to choose one of the previously logged location. Also, all files opened in vim are added to the log file, so it is like an history of files opened and locations in files. Tab<f3> will run grep to search the log file.
     " 2.1 I added and modified mappings
+    " 2.2 I added 't' to open a file in another tab and I removed the '!' in the 2nd autocommand because it suppressed the first autocommand (thanks to Xaizek for that tip)
 
 " Variables
     let g:visualMarksLogFilePath = $vim . '/visualMarks.Log'
@@ -84,8 +85,9 @@
         " s0 This function seems to have difficulty to find strings with ' and inside... or it cannot find some lines (strings)
         "autocmd! BufNewFile,BufRead,BufEnter visualMarks.Log nmap <buffer> <Enter> :exe 'norm 0f]wvf:f:h"fy' \| exe 'norm W"ly$' \| exe 'wincmd j' \| exe 'edit! ' . @f \| let @/ = @l \| exe 'norm ggnzR'<cr>
         com! OpenMark exe 'norm 0f];wvf:f:h"fy' | exe 'norm W"ly$' | exe 'wincmd j' | exe 'edit! ' . @f | let @/ = @l | exe 'norm ggnzR'
-        autocmd! BufNewFile,BufRead,BufEnter visualMarks.Log nmap <buffer> <Enter> :OpenMark<cr>
-         " \| exe 'wincmd k'<cr>
+            au! BufNewFile,BufRead,BufEnter visualMarks.Log nmap <buffer> <Enter> :OpenMark<cr>
+        com! OpenMarkInTab exe 'norm 0f];wvf:f:h"fy' | exe 'norm W"ly$' | exe 'tabe! ' . @f | let @/ = @l | exe 'norm ggnzR'
+            au BufNewFile,BufRead,BufEnter visualMarks.Log nmap <buffer> t :OpenMarkInTab<cr>
         
     " Find a file that I previously used
         nmap <f3> :exe 'ShowMarksFullScreen'<cr>
@@ -145,4 +147,4 @@
             silent! exe 'lvimgrep! /' . l:input . '/j %' 
             lopen 
         endif
-    endfunction
+    endfu
